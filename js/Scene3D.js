@@ -18,6 +18,7 @@ function Scene3D() {
     this._spotBorder = 0.05;
     this._colorMap = null;
     this._adjustment = {x: 0, y: 0, z: 0, alpha: 0, beta: 0, gamma: 0};
+    this._model_slicing = {xmin: 0.0, xmax: 0.0};
 
     this._spots = null;
     this._mapping = null;
@@ -148,6 +149,78 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
             function() {
         if (this._mesh) {
             this._applyAdjustment();
+            this._notify(Scene3D.Events.CHANGE);
+        }
+    }),
+
+    model_slicing: Scene3D._makeProxyProperty('_model_slicing', ['xmin', 'xmax'],
+            function() {
+        if (this._mesh) {
+            console.log(this._model_slicing)
+
+            //Save out the model when appropriate
+            if(this._old_geometry == null){
+                this._old_geometry = this.geometry.clone()
+            }
+
+            console.log(this._old_geometry.length)
+
+            positions = this._old_geometry.getAttribute('position').array;
+            normals = this._old_geometry.getAttribute('normal').array;
+            colors = this._old_geometry.getAttribute('color').array;
+
+
+            //Doing Color Setting Based Upon
+            //Saving the old colors, normals, and positions
+            new_positions = new Array()
+            new_colors = new Array()
+            new_normals = new Array()
+            for( i = 0; i < colors.length/3; i++){
+                base = i*3;
+                x_idx = base
+                y_idx = base+1
+                z_idx = base+2
+
+                r_idx = base
+                g_idx = base+1
+                b_idx = base+2
+
+                if(positions[x_idx] > this._model_slicing.xmin && positions[x_idx] < this._model_slicing.xmax){
+                    new_positions.push(positions[x_idx])
+                    new_positions.push(positions[y_idx])
+                    new_positions.push(positions[z_idx])
+                    new_colors.push(colors[r_idx])
+                    new_colors.push(colors[g_idx])
+                    new_colors.push(colors[b_idx])
+                    new_normals.push(normals[r_idx])
+                    new_normals.push(normals[g_idx])
+                    new_normals.push(normals[b_idx])
+
+                    //color[r_idx] = 1.0;
+                    //color[g_idx] = 1.0;
+                    //color[b_idx] = 1.0;
+                }
+                else{
+                    //color[r_idx] = 1.0;
+                    //color[g_idx] = 1.0;
+                    //color[b_idx] = 1.0;
+                    //positions[x_idx] = 100000
+                    //positions[y_idx] = 100000
+                    //positions[z_idx] = 100000
+                }
+            }
+
+            geometry = this.geometry
+
+            geometry.getAttribute('position').array = new Float32Array(new_positions)
+            geometry.getAttribute('color').array = new Float32Array(new_colors)
+            geometry.getAttribute('normal').array = new Float32Array(new_normals)
+
+            geometry.getAttribute('position').needsUpdate = true;
+            geometry.getAttribute('normal').needsUpdate = true;
+            geometry.getAttribute('color').needsUpdate = true;
+
+
             this._notify(Scene3D.Events.CHANGE);
         }
     }),
@@ -342,6 +415,7 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
             }
             var color = geometry.getAttribute('color').array;
 
+
             // Fill |color| with this._color.
             if (positionCount) {
                 var CHUNK_SIZE = 64;
@@ -378,6 +452,8 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
                     }
                 }
             }
+
+
 
             geometry.getAttribute('color').needsUpdate = true;
 

@@ -143,6 +143,11 @@ function initGUI() {
     adjustment.add(g_workspace.scene3d.adjustment, 'y').name('Y offset').step(0.1);
     adjustment.add(g_workspace.scene3d.adjustment, 'z').name('Z offset').step(0.1);
 
+    //Model Cutting submenu for 3D
+    var model_slicing = f3d.addFolder('Slicing');
+    model_slicing.add(g_workspace.scene3d.model_slicing, 'xmin', -180.0, 180.0).name('xmin').step(1);
+    model_slicing.add(g_workspace.scene3d.model_slicing, 'xmax', -180.0, 180.0).name('xmax').step(1);
+
     var fMapping = g_gui.addFolder('Mapping');
     fMapping.add(g_workspace, 'scaleId', {'Linear': Workspace.Scale.LINEAR.id, 'Logarithmic': Workspace.Scale.LOG.id}).name('Scale');
     fMapping.add(g_workspace, 'hotspotQuantile').name('Hotspot quantile').step(0.0001);

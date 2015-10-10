@@ -18,7 +18,7 @@ function Scene3D() {
     this._spotBorder = 0.05;
     this._colorMap = null;
     this._adjustment = {x: 0, y: 0, z: 0, alpha: 0, beta: 0, gamma: 0};
-    this._model_slicing = {xmin: 0.0, xmax: 0.0};
+    this._model_slicing = {xmin: -100.0, xmax: 100.0, ymin: -100.0, ymax: 100.0, zmin: -100.0, zmax: 100.0};
 
     this._spots = null;
     this._mapping = null;
@@ -153,7 +153,7 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
         }
     }),
 
-    model_slicing: Scene3D._makeProxyProperty('_model_slicing', ['xmin', 'xmax'],
+    model_slicing: Scene3D._makeProxyProperty('_model_slicing', ['xmin', 'xmax', 'ymin', 'ymax', 'zmin', 'zmax'],
             function() {
         if (this._mesh) {
             console.log(this._model_slicing)
@@ -171,17 +171,31 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
 
             model_min_x = 1000000
             model_max_x = -1000000
+            model_min_y = 1000000
+            model_max_y = -1000000
+            model_min_z = 1000000
+            model_max_z = -1000000
 
             for( i = 0; i < colors.length/3; i++){
                 base = i*3;
                 x_idx = base
+                y_idx = base + 1
+                z_idx = base + 2
 
                 model_min_x = Math.min(positions[x_idx], model_min_x)
                 model_max_x = Math.max(positions[x_idx], model_max_x)
+                model_min_y = Math.min(positions[y_idx], model_min_y)
+                model_max_y = Math.max(positions[y_idx], model_max_y)
+                model_min_z = Math.min(positions[z_idx], model_min_z)
+                model_max_z = Math.max(positions[z_idx], model_max_z)
             }
 
             scaled_min_x = (model_max_x - model_min_x)/200.0 * (this._model_slicing.xmin+100.0) + model_min_x
             scaled_max_x = (model_max_x - model_min_x)/200.0 * (this._model_slicing.xmax+100.0) + model_min_x
+            scaled_min_y = (model_max_y - model_min_y)/200.0 * (this._model_slicing.ymin+100.0) + model_min_y
+            scaled_max_y = (model_max_y - model_min_y)/200.0 * (this._model_slicing.ymax+100.0) + model_min_y
+            scaled_min_z = (model_max_z - model_min_z)/200.0 * (this._model_slicing.zmin+100.0) + model_min_z
+            scaled_max_z = (model_max_z - model_min_z)/200.0 * (this._model_slicing.zmax+100.0) + model_min_z
 
             //Doing Color Setting Based Upon
             //Saving the old colors, normals, and positions
@@ -202,7 +216,9 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
                     y_idx = base + j * 3 + 1
                     z_idx = base + j * 3 + 2
 
-                    if(positions[x_idx] >= scaled_min_x && positions[x_idx] <= scaled_max_x){
+                    if( positions[x_idx] >= scaled_min_x && positions[x_idx] <= scaled_max_x &&
+                        positions[y_idx] >= scaled_min_y && positions[y_idx] <= scaled_max_y &&
+                        positions[z_idx] >= scaled_min_z && positions[z_idx] <= scaled_max_z){
                         // in bounds
                     }
                     else{

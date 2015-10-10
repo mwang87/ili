@@ -176,8 +176,8 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
                 base = i*3;
                 x_idx = base
 
-                model_min_x = min(positions[x_idx], model_min_x)
-                model_max_x = max(positions[x_idx], model_max_x)
+                model_min_x = Math.min(positions[x_idx], model_min_x)
+                model_max_x = Math.max(positions[x_idx], model_max_x)
             }
 
             scaled_min_x = (model_max_x - model_min_x)/200.0 * (this._model_slicing.xmin+100.0) + model_min_x

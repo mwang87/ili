@@ -188,6 +188,46 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
             new_positions = new Array()
             new_colors = new Array()
             new_normals = new Array()
+
+            //Look over three vertices at a time, and then remove all 3 if any of the exceed a certain threshold
+            for( i = 0; i < colors.length/9; i++){
+                base = i*3
+
+                //Find whether any vertex exceeds the threshold
+                out_of_bounds = false
+                for(j = 0; j < 3; j++){
+                    x_idx = base + j * 3
+                    y_idx = base + j * 3 + 1
+                    z_idx = base + j * 3 + 2
+
+                    if(positions[x_idx] >= scaled_min_x && positions[x_idx] <= scaled_max_x){
+                        // in bounds
+                    }
+                    else{
+                        out_of_bounds = true
+                        break
+                    }
+                }
+
+                if(out_of_bounds == false){
+                    for(j = 0; j < 3; j++){
+                        x_idx = base + j * 3
+                        y_idx = base + j * 3 + 1
+                        z_idx = base + j * 3 + 2
+
+                        new_positions.push(positions[x_idx])
+                        new_positions.push(positions[y_idx])
+                        new_positions.push(positions[z_idx])
+                        new_colors.push(colors[x_idx])
+                        new_colors.push(colors[y_idx])
+                        new_colors.push(colors[z_idx])
+                        new_normals.push(normals[x_idx])
+                        new_normals.push(normals[y_idx])
+                        new_normals.push(normals[z_idx])
+                    }
+                }
+            }
+/*
             for( i = 0; i < colors.length/3; i++){
                 base = i*3;
                 x_idx = base
@@ -221,7 +261,7 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
                     //positions[y_idx] = 100000
                     //positions[z_idx] = 100000
                 }
-            }
+            }*/
 
             geometry = this.geometry
 

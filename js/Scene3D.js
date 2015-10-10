@@ -169,6 +169,19 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
             normals = this._old_geometry.getAttribute('normal').array;
             colors = this._old_geometry.getAttribute('color').array;
 
+            model_min_x = 1000000
+            model_max_x = -1000000
+
+            for( i = 0; i < colors.length/3; i++){
+                base = i*3;
+                x_idx = base
+
+                model_min_x = min(positions[x_idx], model_min_x)
+                model_max_x = max(positions[x_idx], model_max_x)
+            }
+
+            scaled_min_x = (model_max_x - model_min_x)/100.0 * this._model_slicing.xmin + model_min_x
+            scaled_max_x = (model_max_x - model_min_x)/100.0 * this._model_slicing.xmax + model_min_x
 
             //Doing Color Setting Based Upon
             //Saving the old colors, normals, and positions
@@ -185,7 +198,7 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
                 g_idx = base+1
                 b_idx = base+2
 
-                if(positions[x_idx] > this._model_slicing.xmin && positions[x_idx] < this._model_slicing.xmax){
+                if(positions[x_idx] > scaled_min_x && positions[x_idx] < scaled_max_x){
                     new_positions.push(positions[x_idx])
                     new_positions.push(positions[y_idx])
                     new_positions.push(positions[z_idx])

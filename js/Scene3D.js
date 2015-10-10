@@ -198,7 +198,7 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
                 g_idx = base+1
                 b_idx = base+2
 
-                if(positions[x_idx] > scaled_min_x && positions[x_idx] < scaled_max_x){
+                if(positions[x_idx] >= scaled_min_x && positions[x_idx] <= scaled_max_x){
                     new_positions.push(positions[x_idx])
                     new_positions.push(positions[y_idx])
                     new_positions.push(positions[z_idx])

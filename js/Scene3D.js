@@ -180,8 +180,8 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
                 model_max_x = max(positions[x_idx], model_max_x)
             }
 
-            scaled_min_x = (model_max_x - model_min_x)/100.0 * this._model_slicing.xmin + model_min_x
-            scaled_max_x = (model_max_x - model_min_x)/100.0 * this._model_slicing.xmax + model_min_x
+            scaled_min_x = (model_max_x - model_min_x)/200.0 * (this._model_slicing.xmin+100.0) + model_min_x
+            scaled_max_x = (model_max_x - model_min_x)/200.0 * (this._model_slicing.xmax+100.0) + model_min_x
 
             //Doing Color Setting Based Upon
             //Saving the old colors, normals, and positions

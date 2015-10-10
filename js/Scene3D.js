@@ -189,9 +189,11 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
             new_colors = new Array()
             new_normals = new Array()
 
+
             //Look over three vertices at a time, and then remove all 3 if any of the exceed a certain threshold
             for( i = 0; i < colors.length/9; i++){
-                base = i*3
+                base = i*9
+
 
                 //Find whether any vertex exceeds the threshold
                 out_of_bounds = false
@@ -226,42 +228,9 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
                         new_normals.push(normals[z_idx])
                     }
                 }
+
             }
-/*
-            for( i = 0; i < colors.length/3; i++){
-                base = i*3;
-                x_idx = base
-                y_idx = base+1
-                z_idx = base+2
 
-                r_idx = base
-                g_idx = base+1
-                b_idx = base+2
-
-                if(positions[x_idx] >= scaled_min_x && positions[x_idx] <= scaled_max_x){
-                    new_positions.push(positions[x_idx])
-                    new_positions.push(positions[y_idx])
-                    new_positions.push(positions[z_idx])
-                    new_colors.push(colors[r_idx])
-                    new_colors.push(colors[g_idx])
-                    new_colors.push(colors[b_idx])
-                    new_normals.push(normals[r_idx])
-                    new_normals.push(normals[g_idx])
-                    new_normals.push(normals[b_idx])
-
-                    //color[r_idx] = 1.0;
-                    //color[g_idx] = 1.0;
-                    //color[b_idx] = 1.0;
-                }
-                else{
-                    //color[r_idx] = 1.0;
-                    //color[g_idx] = 1.0;
-                    //color[b_idx] = 1.0;
-                    //positions[x_idx] = 100000
-                    //positions[y_idx] = 100000
-                    //positions[z_idx] = 100000
-                }
-            }*/
 
             geometry = this.geometry
 

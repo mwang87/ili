@@ -351,38 +351,52 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
             normals = this._old_geometry.getAttribute('normal').array;
             colors = this._old_geometry.getAttribute('color').array;
 
-            model_min_x = 1000000
-            model_max_x = -1000000
-            model_min_y = 1000000
-            model_max_y = -1000000
-            model_min_z = 1000000
-            model_max_z = -1000000
 
-            for( i = 0; i < colors.length/3; i++){
-                base = i*3;
-                x_idx = base
-                y_idx = base + 1
-                z_idx = base + 2
 
-                model_min_x = Math.min(positions[x_idx], model_min_x)
-                model_max_x = Math.max(positions[x_idx], model_max_x)
-                model_min_y = Math.min(positions[y_idx], model_min_y)
-                model_max_y = Math.max(positions[y_idx], model_max_y)
-                model_min_z = Math.min(positions[z_idx], model_min_z)
-                model_max_z = Math.max(positions[z_idx], model_max_z)
+            if(this._model_bounds == null){
+                model_min_x = 1000000
+                model_max_x = -1000000
+                model_min_y = 1000000
+                model_max_y = -1000000
+                model_min_z = 1000000
+                model_max_z = -1000000
+
+                for( i = 0; i < colors.length/3; i++){
+                    base = i*3;
+                    x_idx = base
+                    y_idx = base + 1
+                    z_idx = base + 2
+
+                    model_min_x = Math.min(positions[x_idx], model_min_x)
+                    model_max_x = Math.max(positions[x_idx], model_max_x)
+                    model_min_y = Math.min(positions[y_idx], model_min_y)
+                    model_max_y = Math.max(positions[y_idx], model_max_y)
+                    model_min_z = Math.min(positions[z_idx], model_min_z)
+                    model_max_z = Math.max(positions[z_idx], model_max_z)
+                }
+
+                this._model_bounds = {model_min_x: model_min_x, model_max_x: model_max_x, model_min_y: model_min_y, model_max_y: model_max_y,
+                    model_min_z: model_min_z, model_max_z: model_max_z}
             }
+
+            model_min_x = this._model_bounds.model_min_x
+            model_max_x = this._model_bounds.model_max_x
+            model_min_y = this._model_bounds.model_min_y
+            model_max_y = this._model_bounds.model_max_y
+            model_min_z = this._model_bounds.model_min_z
+            model_max_z = this._model_bounds.model_max_z
 
             number_of_partitions = this._model_exploding.num_partitions
             partition_separation_ratio = this._model_exploding.slice_separation
 
             //Doing Color Setting Based Upon
             //Saving the old colors, normals, and positions
-            new_positions = new Array()
-            new_colors = new Array()
-            new_normals = new Array()
-
+            new_positions = new Float32Array(positions.length)
+            new_colors = new Float32Array(positions.length)
+            new_normals = new Float32Array(positions.length)
 
             //Look over three vertices at a time, and then remove all 3 if any of the exceed a certain threshold
+            current_array_pointer = 0
             for( i = 0; i < colors.length/9; i++){
                 base = i*9
 
@@ -427,43 +441,52 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
                     if(this._model_exploding.dimension == "x"){
                         delta_x = model_max_x  - model_min_x;
 
-                        new_positions.push(positions[x_idx] + partition_separation_ratio*delta_x*max_partition_number)
-                        new_positions.push(positions[y_idx])
-                        new_positions.push(positions[z_idx])
-                        new_colors.push(colors[x_idx])
-                        new_colors.push(colors[y_idx])
-                        new_colors.push(colors[z_idx])
-                        new_normals.push(normals[x_idx])
-                        new_normals.push(normals[y_idx])
-                        new_normals.push(normals[z_idx])
+                        new_positions[current_array_pointer] = positions[x_idx] + partition_separation_ratio*delta_x*max_partition_number
+                        new_colors[current_array_pointer] = colors[x_idx]
+                        new_normals[current_array_pointer] = normals[x_idx]
+                        current_array_pointer++;
+                        new_positions[current_array_pointer] = positions[y_idx]
+                        new_colors[current_array_pointer] = colors[y_idx]
+                        new_normals[current_array_pointer] = normals[y_idx]
+                        current_array_pointer++;
+                        new_positions[current_array_pointer] = positions[z_idx]
+                        new_colors[current_array_pointer] = colors[z_idx]
+                        new_normals[current_array_pointer] = normals[z_idx]
+                        current_array_pointer++;
                     }
 
                     if(this._model_exploding.dimension == "y"){
                         delta_y = model_max_y  - model_min_y;
 
-                        new_positions.push(positions[x_idx])
-                        new_positions.push(positions[y_idx] + partition_separation_ratio*delta_y*max_partition_number)
-                        new_positions.push(positions[z_idx])
-                        new_colors.push(colors[x_idx])
-                        new_colors.push(colors[y_idx])
-                        new_colors.push(colors[z_idx])
-                        new_normals.push(normals[x_idx])
-                        new_normals.push(normals[y_idx])
-                        new_normals.push(normals[z_idx])
+                        new_positions[current_array_pointer] = positions[x_idx]
+                        new_colors[current_array_pointer] = colors[x_idx]
+                        new_normals[current_array_pointer] = normals[x_idx]
+                        current_array_pointer++;
+                        new_positions[current_array_pointer] = positions[y_idx] + partition_separation_ratio*delta_y*max_partition_number
+                        new_colors[current_array_pointer] = colors[y_idx]
+                        new_normals[current_array_pointer] = normals[y_idx]
+                        current_array_pointer++;
+                        new_positions[current_array_pointer] = positions[z_idx]
+                        new_colors[current_array_pointer] = colors[z_idx]
+                        new_normals[current_array_pointer] = normals[z_idx]
+                        current_array_pointer++;
                     }
 
                     if(this._model_exploding.dimension == "z"){
                         delta_z = model_max_z  - model_min_z;
 
-                        new_positions.push(positions[x_idx])
-                        new_positions.push(positions[y_idx])
-                        new_positions.push(positions[z_idx] + partition_separation_ratio*delta_z*max_partition_number)
-                        new_colors.push(colors[x_idx])
-                        new_colors.push(colors[y_idx])
-                        new_colors.push(colors[z_idx])
-                        new_normals.push(normals[x_idx])
-                        new_normals.push(normals[y_idx])
-                        new_normals.push(normals[z_idx])
+                        new_positions[current_array_pointer] = positions[x_idx]
+                        new_colors[current_array_pointer] = colors[x_idx]
+                        new_normals[current_array_pointer] = normals[x_idx]
+                        current_array_pointer++;
+                        new_positions[current_array_pointer] = positions[y_idx]
+                        new_colors[current_array_pointer] = colors[y_idx]
+                        new_normals[current_array_pointer] = normals[y_idx]
+                        current_array_pointer++;
+                        new_positions[current_array_pointer] = positions[z_idx] + partition_separation_ratio*delta_z*max_partition_number
+                        new_colors[current_array_pointer] = colors[z_idx]
+                        new_normals[current_array_pointer] = normals[z_idx]
+                        current_array_pointer++;
                     }
 
 
@@ -473,9 +496,9 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
 
             geometry = this.geometry
 
-            geometry.getAttribute('position').array = new Float32Array(new_positions)
-            geometry.getAttribute('color').array = new Float32Array(new_colors)
-            geometry.getAttribute('normal').array = new Float32Array(new_normals)
+            geometry.getAttribute('position').array = new_positions
+            geometry.getAttribute('color').array = new_colors
+            geometry.getAttribute('normal').array = new_normals
 
             geometry.getAttribute('position').needsUpdate = true;
             geometry.getAttribute('normal').needsUpdate = true;

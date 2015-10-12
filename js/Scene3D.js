@@ -19,6 +19,7 @@ function Scene3D() {
     this._colorMap = null;
     this._adjustment = {x: 0, y: 0, z: 0, alpha: 0, beta: 0, gamma: 0};
     this._model_slicing = {xmin: -100.0, xmax: 100.0, ymin: -100.0, ymax: 100.0, zmin: -100.0, zmax: 100.0};
+    this._model_bounds = null
     this._model_exploding = {do_explode: false, dimension: "x", num_partitions: 5, slice_separation: 0.3}
     this._model_slicing_real_coordinates = {xmin: "-100.0", xmax: "100.0", ymin: "-100.0", ymax: "100.0", zmin: "-100.0", zmax: "100.0"};
 
@@ -167,26 +168,40 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
             normals = this._old_geometry.getAttribute('normal').array;
             colors = this._old_geometry.getAttribute('color').array;
 
-            model_min_x = 1000000
-            model_max_x = -1000000
-            model_min_y = 1000000
-            model_max_y = -1000000
-            model_min_z = 1000000
-            model_max_z = -1000000
+            var t1 = new Date();
 
-            for( i = 0; i < colors.length/3; i++){
-                base = i*3;
-                x_idx = base
-                y_idx = base + 1
-                z_idx = base + 2
+            if(this._model_bounds == null){
+                model_min_x = 1000000
+                model_max_x = -1000000
+                model_min_y = 1000000
+                model_max_y = -1000000
+                model_min_z = 1000000
+                model_max_z = -1000000
 
-                model_min_x = Math.min(positions[x_idx], model_min_x)
-                model_max_x = Math.max(positions[x_idx], model_max_x)
-                model_min_y = Math.min(positions[y_idx], model_min_y)
-                model_max_y = Math.max(positions[y_idx], model_max_y)
-                model_min_z = Math.min(positions[z_idx], model_min_z)
-                model_max_z = Math.max(positions[z_idx], model_max_z)
+                for( i = 0; i < colors.length/3; i++){
+                    base = i*3;
+                    x_idx = base
+                    y_idx = base + 1
+                    z_idx = base + 2
+
+                    model_min_x = Math.min(positions[x_idx], model_min_x)
+                    model_max_x = Math.max(positions[x_idx], model_max_x)
+                    model_min_y = Math.min(positions[y_idx], model_min_y)
+                    model_max_y = Math.max(positions[y_idx], model_max_y)
+                    model_min_z = Math.min(positions[z_idx], model_min_z)
+                    model_max_z = Math.max(positions[z_idx], model_max_z)
+                }
+
+                this._model_bounds = {model_min_x: model_min_x, model_max_x: model_max_x, model_min_y: model_min_y, model_max_y: model_max_y,
+                    model_min_z: model_min_z, model_max_z: model_max_z}
             }
+
+            model_min_x = this._model_bounds.model_min_x
+            model_max_x = this._model_bounds.model_max_x
+            model_min_y = this._model_bounds.model_min_y
+            model_max_y = this._model_bounds.model_max_y
+            model_min_z = this._model_bounds.model_min_z
+            model_max_z = this._model_bounds.model_max_z
 
             scaled_min_x = (model_max_x - model_min_x)/200.0 * (this._model_slicing.xmin+100.0) + model_min_x
             scaled_max_x = (model_max_x - model_min_x)/200.0 * (this._model_slicing.xmax+100.0) + model_min_x
@@ -195,17 +210,46 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
             scaled_min_z = (model_max_z - model_min_z)/200.0 * (this._model_slicing.zmin+100.0) + model_min_z
             scaled_max_z = (model_max_z - model_min_z)/200.0 * (this._model_slicing.zmax+100.0) + model_min_z
 
-            //Doing Color Setting Based Upon
-            //Saving the old colors, normals, and positions
-            new_positions = new Array()
-            new_colors = new Array()
-            new_normals = new Array()
+            var t2 = new Date();
 
-
-            //Look over three vertices at a time, and then remove all 3 if any of the exceed a certain threshold
+            triangle_count = 0
             for( i = 0; i < colors.length/9; i++){
                 base = i*9
 
+
+                //Find whether any vertex exceeds the threshold
+                out_of_bounds = false
+                for(j = 0; j < 3; j++){
+                    x_idx = base + j * 3
+                    y_idx = base + j * 3 + 1
+                    z_idx = base + j * 3 + 2
+
+                    if( positions[x_idx] >= scaled_min_x && positions[x_idx] <= scaled_max_x &&
+                        positions[y_idx] >= scaled_min_y && positions[y_idx] <= scaled_max_y &&
+                        positions[z_idx] >= scaled_min_z && positions[z_idx] <= scaled_max_z){
+                        // in bounds
+                    }
+                    else{
+                        out_of_bounds = true
+                        break
+                    }
+                }
+
+                if(out_of_bounds == false){
+                    triangle_count++;
+                }
+            }
+
+            //Doing Color Setting Based Upon
+            //Saving the old colors, normals, and positions
+            new_positions = new Float32Array(triangle_count * 9)
+            new_colors = new Float32Array(triangle_count * 9)
+            new_normals = new Float32Array(triangle_count * 9)
+
+            current_array_pointer = 0
+            //Look over three vertices at a time, and then remove all 3 if any of the exceed a certain threshold
+            for( i = 0; i < colors.length/9; i++){
+                base = i*9
 
                 //Find whether any vertex exceeds the threshold
                 out_of_bounds = false
@@ -231,19 +275,24 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
                         y_idx = base + j * 3 + 1
                         z_idx = base + j * 3 + 2
 
-                        new_positions.push(positions[x_idx])
-                        new_positions.push(positions[y_idx])
-                        new_positions.push(positions[z_idx])
-                        new_colors.push(colors[x_idx])
-                        new_colors.push(colors[y_idx])
-                        new_colors.push(colors[z_idx])
-                        new_normals.push(normals[x_idx])
-                        new_normals.push(normals[y_idx])
-                        new_normals.push(normals[z_idx])
+                        new_positions[current_array_pointer] = positions[x_idx]
+                        new_colors[current_array_pointer] = colors[x_idx]
+                        new_normals[current_array_pointer] = normals[x_idx]
+                        current_array_pointer++;
+                        new_positions[current_array_pointer] = positions[y_idx]
+                        new_colors[current_array_pointer] = colors[y_idx]
+                        new_normals[current_array_pointer] = normals[y_idx]
+                        current_array_pointer++;
+                        new_positions[current_array_pointer] = positions[z_idx]
+                        new_colors[current_array_pointer] = colors[z_idx]
+                        new_normals[current_array_pointer] = normals[z_idx]
+                        current_array_pointer++;
                     }
                 }
-
             }
+
+            var t3 = new Date();
+
 
             //Updating the real coordinates
             this._model_slicing_real_coordinates["xmin"] = scaled_min_x
@@ -255,16 +304,22 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
 
             updateGUIDisplay();
 
-
             geometry = this.geometry
 
-            geometry.getAttribute('position').array = new Float32Array(new_positions)
-            geometry.getAttribute('color').array = new Float32Array(new_colors)
-            geometry.getAttribute('normal').array = new Float32Array(new_normals)
+            geometry.getAttribute('position').array = new_positions
+            geometry.getAttribute('color').array = new_colors
+            geometry.getAttribute('normal').array = new_normals
 
             geometry.getAttribute('position').needsUpdate = true;
             geometry.getAttribute('normal').needsUpdate = true;
             geometry.getAttribute('color').needsUpdate = true;
+
+            var t4 = new Date();
+
+
+            console.log('T1-T2: ' + (t2.valueOf() - t1.valueOf()) / 1000);
+            console.log('T2-T3: ' + (t3.valueOf() - t2.valueOf()) / 1000);
+            console.log('T3-T4: ' + (t4.valueOf() - t3.valueOf()) / 1000);
 
 
             this._notify(Scene3D.Events.CHANGE);

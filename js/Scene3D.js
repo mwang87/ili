@@ -20,6 +20,7 @@ function Scene3D() {
     this._adjustment = {x: 0, y: 0, z: 0, alpha: 0, beta: 0, gamma: 0};
     this._model_slicing = {xmin: -100.0, xmax: 100.0, ymin: -100.0, ymax: 100.0, zmin: -100.0, zmax: 100.0};
     this._model_exploding = {do_explode: false, dimension: "x", num_partitions: 5, slice_separation: 0.3}
+    this._model_slicing_real_coordinates = {xmin: "-100.0", xmax: "100.0", ymin: "-100.0", ymax: "100.0", zmin: "-100.0", zmax: "100.0"};
 
     this._spots = null;
     this._mapping = null;
@@ -157,14 +158,10 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
     model_slicing: Scene3D._makeProxyProperty('_model_slicing', ['xmin', 'xmax', 'ymin', 'ymax', 'zmin', 'zmax'],
             function() {
         if (this._mesh) {
-            console.log(this._model_slicing)
-
             //Save out the model when appropriate
             if(this._old_geometry == null){
                 this._old_geometry = this.geometry.clone()
             }
-
-            console.log(this._old_geometry.length)
 
             positions = this._old_geometry.getAttribute('position').array;
             normals = this._old_geometry.getAttribute('normal').array;
@@ -247,6 +244,16 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
                 }
 
             }
+
+            //Updating the real coordinates
+            this._model_slicing_real_coordinates["xmin"] = scaled_min_x
+            this._model_slicing_real_coordinates["xmax"] = scaled_max_x
+            this._model_slicing_real_coordinates["ymin"] = scaled_min_y
+            this._model_slicing_real_coordinates["ymax"] = scaled_max_y
+            this._model_slicing_real_coordinates["zmin"] = scaled_min_z
+            this._model_slicing_real_coordinates["zmax"] = scaled_max_z
+
+            updateGUIDisplay();
 
 
             geometry = this.geometry

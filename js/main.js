@@ -152,6 +152,14 @@ function initGUI() {
     model_slicing.add(g_workspace.scene3d.model_slicing, 'zmin', -100.0, 100.0).name('zmin').step(1);
     model_slicing.add(g_workspace.scene3d.model_slicing, 'zmax', -100.0, 100.0).name('zmax').step(1);
 
+    var model_slicing_real_coordinates = f3d.addFolder('Slicing Coordinates Display');
+    model_slicing_real_coordinates.add(g_workspace.scene3d._model_slicing_real_coordinates, 'xmin')
+    model_slicing_real_coordinates.add(g_workspace.scene3d._model_slicing_real_coordinates, 'xmax')
+    model_slicing_real_coordinates.add(g_workspace.scene3d._model_slicing_real_coordinates, 'ymin')
+    model_slicing_real_coordinates.add(g_workspace.scene3d._model_slicing_real_coordinates, 'ymax')
+    model_slicing_real_coordinates.add(g_workspace.scene3d._model_slicing_real_coordinates, 'zmin')
+    model_slicing_real_coordinates.add(g_workspace.scene3d._model_slicing_real_coordinates, 'zmax')
+
     //Model Expanding View for 3D
     var model_exploding = f3d.addFolder('1D Exploding');
     model_exploding.add(g_workspace.scene3d.model_exploding, 'dimension', ["x", "y", "z"]).name('dimension');
@@ -182,6 +190,23 @@ function initGUI() {
         f2d.closed = (g_workspace.mode != Workspace.Mode.MODE_2D);
         f3d.closed = (g_workspace.mode != Workspace.Mode.MODE_3D);
     });
+}
+
+function updateGUIDisplay(root_object){
+    if(root_object == null){
+        updateGUIDisplay(g_gui)
+        return;
+    }
+
+    for (var i in root_object.__controllers) {
+        root_object.__controllers[i].updateDisplay();
+    }
+
+    for(var i in root_object.__folders){
+        if(i != null){
+            updateGUIDisplay(root_object.__folders[i])
+        }
+    }
 }
 
 function onAutoMappingChange(mapping) {

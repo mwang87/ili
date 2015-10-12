@@ -19,7 +19,7 @@ function Scene3D() {
     this._colorMap = null;
     this._adjustment = {x: 0, y: 0, z: 0, alpha: 0, beta: 0, gamma: 0};
     this._model_slicing = {xmin: -100.0, xmax: 100.0, ymin: -100.0, ymax: 100.0, zmin: -100.0, zmax: 100.0};
-    this._model_exploding = {do_explode: false, dimension: "x"}
+    this._model_exploding = {do_explode: false, dimension: "x", num_partitions: 5, slice_separation: 0.3}
 
     this._spots = null;
     this._mapping = null;
@@ -264,9 +264,164 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
         }
     }),
 
-    model_exploding: Scene3D._makeProxyProperty('_model_exploding', ['dimension', 'do_explode'],
+    model_exploding: Scene3D._makeProxyProperty('_model_exploding', ['dimension', 'do_explode', 'num_partitions', 'slice_separation'],
             function() {
         if (this._mesh) {
+            //Save out the model when appropriate
+            if(this._old_geometry == null){
+                this._old_geometry = this.geometry.clone()
+            }
+
+            if(this._model_exploding.do_explode == false){
+                geometry.getAttribute('position').array = this._old_geometry.getAttribute('position').array;
+                geometry.getAttribute('color').array = this._old_geometry.getAttribute('color').array;
+                geometry.getAttribute('normal').array = this._old_geometry.getAttribute('normal').array;
+
+                geometry.getAttribute('position').needsUpdate = true;
+                geometry.getAttribute('normal').needsUpdate = true;
+                geometry.getAttribute('color').needsUpdate = true;
+
+                this._notify(Scene3D.Events.CHANGE);
+                return;
+            }
+
+            positions = this._old_geometry.getAttribute('position').array;
+            normals = this._old_geometry.getAttribute('normal').array;
+            colors = this._old_geometry.getAttribute('color').array;
+
+            model_min_x = 1000000
+            model_max_x = -1000000
+            model_min_y = 1000000
+            model_max_y = -1000000
+            model_min_z = 1000000
+            model_max_z = -1000000
+
+            for( i = 0; i < colors.length/3; i++){
+                base = i*3;
+                x_idx = base
+                y_idx = base + 1
+                z_idx = base + 2
+
+                model_min_x = Math.min(positions[x_idx], model_min_x)
+                model_max_x = Math.max(positions[x_idx], model_max_x)
+                model_min_y = Math.min(positions[y_idx], model_min_y)
+                model_max_y = Math.max(positions[y_idx], model_max_y)
+                model_min_z = Math.min(positions[z_idx], model_min_z)
+                model_max_z = Math.max(positions[z_idx], model_max_z)
+            }
+
+            number_of_partitions = this._model_exploding.num_partitions
+            partition_separation_ratio = this._model_exploding.slice_separation
+
+            //Doing Color Setting Based Upon
+            //Saving the old colors, normals, and positions
+            new_positions = new Array()
+            new_colors = new Array()
+            new_normals = new Array()
+
+
+            //Look over three vertices at a time, and then remove all 3 if any of the exceed a certain threshold
+            for( i = 0; i < colors.length/9; i++){
+                base = i*9
+
+                max_partition_number = 0
+                //Determine which partition number this triangle is a part of
+                for(j = 0; j < 3; j++){
+                    x_idx = base + j * 3
+                    y_idx = base + j * 3 + 1
+                    z_idx = base + j * 3 + 2
+
+                    if(this._model_exploding.dimension == "x"){
+                        delta_x = model_max_x  - model_min_x;
+                        transformed_x = positions[x_idx] - model_min_x;
+                        normalized_x = transformed_x / delta_x;
+                        partition_number = Math.floor(normalized_x/(1.0/number_of_partitions))
+                        max_partition_number = Math.max(partition_number)
+                    }
+
+                    if(this._model_exploding.dimension == "y"){
+                        delta_dim = model_max_y  - model_min_y;
+                        transformed_dim = positions[y_idx] - model_min_y;
+                        normalized_dim = transformed_dim / delta_dim;
+                        partition_number = Math.floor(normalized_dim/(1.0/number_of_partitions))
+                        max_partition_number = Math.max(partition_number)
+                    }
+
+                    if(this._model_exploding.dimension == "z"){
+                        delta_dim = model_max_z  - model_min_z;
+                        transformed_dim = positions[z_idx] - model_min_z;
+                        normalized_dim = transformed_dim / delta_dim;
+                        partition_number = Math.floor(normalized_dim/(1.0/number_of_partitions))
+                        max_partition_number = Math.max(partition_number)
+                    }
+                }
+                //console.log(max_partition_number);
+
+                for(j = 0; j < 3; j++){
+                    x_idx = base + j * 3
+                    y_idx = base + j * 3 + 1
+                    z_idx = base + j * 3 + 2
+
+                    if(this._model_exploding.dimension == "x"){
+                        delta_x = model_max_x  - model_min_x;
+
+                        new_positions.push(positions[x_idx] + partition_separation_ratio*delta_x*max_partition_number)
+                        new_positions.push(positions[y_idx])
+                        new_positions.push(positions[z_idx])
+                        new_colors.push(colors[x_idx])
+                        new_colors.push(colors[y_idx])
+                        new_colors.push(colors[z_idx])
+                        new_normals.push(normals[x_idx])
+                        new_normals.push(normals[y_idx])
+                        new_normals.push(normals[z_idx])
+                    }
+
+                    if(this._model_exploding.dimension == "y"){
+                        delta_y = model_max_y  - model_min_y;
+
+                        new_positions.push(positions[x_idx])
+                        new_positions.push(positions[y_idx] + partition_separation_ratio*delta_y*max_partition_number)
+                        new_positions.push(positions[z_idx])
+                        new_colors.push(colors[x_idx])
+                        new_colors.push(colors[y_idx])
+                        new_colors.push(colors[z_idx])
+                        new_normals.push(normals[x_idx])
+                        new_normals.push(normals[y_idx])
+                        new_normals.push(normals[z_idx])
+                    }
+
+                    if(this._model_exploding.dimension == "z"){
+                        delta_z = model_max_z  - model_min_z;
+
+                        new_positions.push(positions[x_idx])
+                        new_positions.push(positions[y_idx])
+                        new_positions.push(positions[z_idx] + partition_separation_ratio*delta_z*max_partition_number)
+                        new_colors.push(colors[x_idx])
+                        new_colors.push(colors[y_idx])
+                        new_colors.push(colors[z_idx])
+                        new_normals.push(normals[x_idx])
+                        new_normals.push(normals[y_idx])
+                        new_normals.push(normals[z_idx])
+                    }
+
+
+                }
+            }
+
+
+            geometry = this.geometry
+
+            geometry.getAttribute('position').array = new Float32Array(new_positions)
+            geometry.getAttribute('color').array = new Float32Array(new_colors)
+            geometry.getAttribute('normal').array = new Float32Array(new_normals)
+
+            geometry.getAttribute('position').needsUpdate = true;
+            geometry.getAttribute('normal').needsUpdate = true;
+            geometry.getAttribute('color').needsUpdate = true;
+
+
+
+
             this._notify(Scene3D.Events.CHANGE);
         }
     }),

@@ -152,6 +152,12 @@ function initGUI() {
     model_slicing.add(g_workspace.scene3d.model_slicing, 'zmin', -100.0, 100.0).name('zmin').step(1);
     model_slicing.add(g_workspace.scene3d.model_slicing, 'zmax', -100.0, 100.0).name('zmax').step(1);
 
+    //Model Expanding View for 3D
+    var model_exploding = f3d.addFolder('1D Exploding');
+    model_exploding.add(g_workspace.scene3d.model_exploding, 'dimension', ["x", "y", "z"]).name('dimension');
+    model_exploding.add(g_workspace.scene3d.model_exploding, 'do_explode').name('do_explode');
+
+
     var fMapping = g_gui.addFolder('Mapping');
     fMapping.add(g_workspace, 'scaleId', {'Linear': Workspace.Scale.LINEAR.id, 'Logarithmic': Workspace.Scale.LOG.id}).name('Scale');
     fMapping.add(g_workspace, 'hotspotQuantile').name('Hotspot quantile').step(0.0001);

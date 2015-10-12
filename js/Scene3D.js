@@ -19,6 +19,7 @@ function Scene3D() {
     this._colorMap = null;
     this._adjustment = {x: 0, y: 0, z: 0, alpha: 0, beta: 0, gamma: 0};
     this._model_slicing = {xmin: -100.0, xmax: 100.0, ymin: -100.0, ymax: 100.0, zmin: -100.0, zmax: 100.0};
+    this._model_exploding = {do_explode: false, dimension: "x"}
 
     this._spots = null;
     this._mapping = null;
@@ -259,6 +260,13 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
             geometry.getAttribute('color').needsUpdate = true;
 
 
+            this._notify(Scene3D.Events.CHANGE);
+        }
+    }),
+
+    model_exploding: Scene3D._makeProxyProperty('_model_exploding', ['dimension', 'do_explode'],
+            function() {
+        if (this._mesh) {
             this._notify(Scene3D.Events.CHANGE);
         }
     }),

@@ -343,7 +343,7 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
             console.log('T2-T3: ' + (t3.valueOf() - t2.valueOf()) / 1000);
             console.log('T3-T4: ' + (t4.valueOf() - t3.valueOf()) / 1000);
 
-
+            this._recolor();
             this._notify(Scene3D.Events.CHANGE);
         }
     }),
@@ -526,9 +526,7 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
             geometry.getAttribute('normal').needsUpdate = true;
             geometry.getAttribute('color').needsUpdate = true;
 
-
-
-
+            this._recolor();
             this._notify(Scene3D.Events.CHANGE);
         }
     }),

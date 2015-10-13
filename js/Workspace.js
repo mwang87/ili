@@ -147,6 +147,8 @@ Workspace.prototype = Object.create(EventSource.prototype, {
                             attribute.array, attribute.itemSize));
                 }
                 this._scene3d.geometry = geometry;
+                this._scene3d._old_geometry = null;
+                this._scene3d._model_bounds = null;
                 if (this._spots) {
                     this._scene3d.spots = this._spots;
                     this._mapMesh();

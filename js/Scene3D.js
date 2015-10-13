@@ -22,6 +22,14 @@ function Scene3D() {
     this._model_bounds = null
     this._model_exploding = {do_explode: false, dimension: "x", num_partitions: 5, slice_separation: 0.3}
     this._model_slicing_real_coordinates = {xmin: "-100.0", xmax: "100.0", ymin: "-100.0", ymax: "100.0", zmin: "-100.0", zmax: "100.0"};
+    this._model_export = { download:
+        function(parent_obj){
+            return function(){
+                console.log(parent_obj)
+                BinaryStlWriter.save(parent_obj.geometry, "export.stl")
+            }
+        }(this)
+    };
 
     this._spots = null;
     this._mapping = null;
@@ -155,6 +163,8 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
             this._notify(Scene3D.Events.CHANGE);
         }
     }),
+
+    model_export: Scene3D._makeProxyProperty('_model_export', ['download']),
 
     model_slicing: Scene3D._makeProxyProperty('_model_slicing', ['xmin', 'xmax', 'ymin', 'ymax', 'zmin', 'zmax'],
             function() {

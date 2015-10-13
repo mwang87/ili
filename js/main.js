@@ -167,6 +167,9 @@ function initGUI() {
     model_exploding.add(g_workspace.scene3d.model_exploding, 'num_partitions', 4, 10).name('num_partitions').step(1);
     model_exploding.add(g_workspace.scene3d.model_exploding, 'slice_separation', 0.1, 1.0).name('slice_separation').step(0.1);
 
+    //Model Export Button
+    f3d.add(g_workspace.scene3d.model_export,'download').name("Export STL");
+
 
     var fMapping = g_gui.addFolder('Mapping');
     fMapping.add(g_workspace, 'scaleId', {'Linear': Workspace.Scale.LINEAR.id, 'Logarithmic': Workspace.Scale.LOG.id}).name('Scale');

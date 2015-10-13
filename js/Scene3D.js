@@ -26,10 +26,11 @@ function Scene3D() {
         function(parent_obj){
             return function(){
                 console.log(parent_obj)
-                BinaryStlWriter.save(parent_obj.geometry, "export.stl")
+                BinaryStlWriter.save(parent_obj.geometry, parent_obj.model_export_name)
             }
         }(this)
     };
+    this._model_export_name = "export.stl"
 
     this._spots = null;
     this._mapping = null;
@@ -165,6 +166,17 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
     }),
 
     model_export: Scene3D._makeProxyProperty('_model_export', ['download']),
+
+    model_export_name: {
+        get: function() {
+            return this._model_export_name;
+        },
+
+        set: function(value) {
+            this._model_export_name = value;
+        }
+    },
+
 
     model_slicing: Scene3D._makeProxyProperty('_model_slicing', ['xmin', 'xmax', 'ymin', 'ymax', 'zmin', 'zmax'],
             function() {

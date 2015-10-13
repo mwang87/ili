@@ -168,7 +168,11 @@ function initGUI() {
     model_exploding.add(g_workspace.scene3d.model_exploding, 'slice_separation', 0.1, 1.0).name('slice_separation').step(0.1);
 
     //Model Export Button
-    f3d.add(g_workspace.scene3d.model_export,'download').name("Export STL");
+    var model_exports = f3d.addFolder('Model Exports');
+    model_exports.add(g_workspace.scene3d,'model_export_name').name("Export Name");
+    model_exports.add(g_workspace.scene3d.model_export,'download').name("Export STL");
+
+
 
 
     var fMapping = g_gui.addFolder('Mapping');

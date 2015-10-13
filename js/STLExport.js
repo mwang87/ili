@@ -4,12 +4,6 @@
 var BinaryStlWriter = (function() {
     var that = {};
 
-    var writeVector = function(dataview, offset, vector, isLittleEndian) {
-        offset = writeFloat(dataview, offset, vector.x, isLittleEndian);
-        offset = writeFloat(dataview, offset, vector.y, isLittleEndian);
-        return writeFloat(dataview, offset, vector.z, isLittleEndian);
-    };
-
     var writeFloat = function(dataview, offset, float, isLittleEndian) {
         dataview.setFloat32(offset, float, isLittleEndian);
         return offset + 4;

@@ -181,14 +181,30 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
     model_slicing: Scene3D._makeProxyProperty('_model_slicing', ['xmin', 'xmax', 'ymin', 'ymax', 'zmin', 'zmax'],
             function() {
         if (this._mesh) {
+            mapping_present = false
+            if(this.mapping != null){
+                mapping_present = true
+            }
+
             //Save out the model when appropriate
             if(this._old_geometry == null){
                 this._old_geometry = this.geometry.clone()
+                if(mapping_present){
+                    this._old_mapping = new Object()
+                    this._old_mapping.closestSpotIndeces = new Int32Array(this.mapping.closestSpotIndeces.length)
+                    this._old_mapping.closestSpotDistances = new Float32Array(this.mapping.closestSpotDistances.length)
+                    for(i in this.mapping.closestSpotDistances){
+                        this._old_mapping.closestSpotIndeces[i] = this.mapping.closestSpotIndeces[i]
+                        this._old_mapping.closestSpotDistances[i] = this.mapping.closestSpotDistances[i]
+                    }
+                }
             }
 
             positions = this._old_geometry.getAttribute('position').array;
             normals = this._old_geometry.getAttribute('normal').array;
             colors = this._old_geometry.getAttribute('color').array;
+
+
 
             var t1 = new Date();
 
@@ -268,7 +284,21 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
             new_colors = new Float32Array(triangle_count * 9)
             new_normals = new Float32Array(triangle_count * 9)
 
+            closestSpotIndeces = null;
+            closestSpotDistances = null;
+            new_closestSpotIndeces = null;
+            new_closestSpotDistances = null;
+            if(mapping_present){
+                closestSpotIndeces = this._old_mapping.closestSpotIndeces;
+                closestSpotDistances = this._old_mapping.closestSpotDistances;
+                new_closestSpotIndeces = new Int32Array(triangle_count * 3)
+                new_closestSpotDistances = new Float32Array(triangle_count * 3)
+            }
+
+
+
             current_array_pointer = 0
+            mapping_index_pointer = 0
             //Look over three vertices at a time, and then remove all 3 if any of the exceed a certain threshold
             for( i = 0; i < colors.length/9; i++){
                 base = i*9
@@ -309,6 +339,12 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
                         new_colors[current_array_pointer] = colors[z_idx]
                         new_normals[current_array_pointer] = normals[z_idx]
                         current_array_pointer++;
+
+                        if(mapping_present){
+                            new_closestSpotIndeces[mapping_index_pointer] = closestSpotIndeces[i*3+j]
+                            new_closestSpotDistances[mapping_index_pointer] = closestSpotDistances[i*3+j]
+                            mapping_index_pointer++;
+                        }
                     }
                 }
             }
@@ -336,6 +372,15 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
             geometry.getAttribute('normal').needsUpdate = true;
             geometry.getAttribute('color').needsUpdate = true;
 
+
+            if(mapping_present){
+                this.mapping.closestSpotIndeces = new_closestSpotIndeces
+                this.mapping.closestSpotDistances = new_closestSpotDistances
+            }
+
+
+
+
             var t4 = new Date();
 
 
@@ -352,8 +397,29 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
             function() {
         if (this._mesh) {
             //Save out the model when appropriate
+            mapping_present = false
+            if(this.mapping != null){
+                mapping_present = true
+            }
+
             if(this._old_geometry == null){
                 this._old_geometry = this.geometry.clone()
+                if(mapping_present){
+                    this._old_mapping = new Object()
+                    this._old_mapping.closestSpotIndeces = new Int32Array(this.mapping.closestSpotIndeces.length)
+                    this._old_mapping.closestSpotDistances = new Float32Array(this.mapping.closestSpotDistances.length)
+                    for(i in this.mapping.closestSpotDistances){
+                        this._old_mapping.closestSpotIndeces[i] = this.mapping.closestSpotIndeces[i]
+                        this._old_mapping.closestSpotDistances[i] = this.mapping.closestSpotDistances[i]
+                    }
+                }
+            }
+
+
+
+            if(this.mapping != null && this._old_mapping != null){
+                this.mapping.closestSpotIndeces = this._old_mapping.closestSpotIndeces
+                this.mapping.closestSpotDistances = this._old_mapping.closestSpotDistances
             }
 
             if(this._model_exploding.do_explode == false){

@@ -133,7 +133,7 @@ function initGUI() {
     f3d.addColor(g_workspace.scene3d, 'color').name('Color');
     f3d.addColor(g_workspace.scene3d, 'backgroundColor').name('Background');
     f3d.add(g_workspace.scene3d.frontLight, 'intensity', 0, 3).name('Light');
-    f3d.add(g_workspace.scene3d, 'model_transparency', 0, 1.0).name('Model Transparency').step(0.1);
+    f3d.add(g_workspace.scene3d, 'model_transparency', 0, 1.0).name('Opacity').step(0.1);
     f3d.add(g_workspace.scene3d, 'spotBorder', 0, 1).name('Spot border').step(0.01);
     f3d.add(g_views, 'exportPixelRatio3d', [0.5, 1.0, 2.0, 4.0]).name('Export pixel ratio');
     var adjustment = f3d.addFolder('Adjustment');

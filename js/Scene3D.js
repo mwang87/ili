@@ -32,6 +32,8 @@ function Scene3D() {
     };
     this._model_export_name = "export.stl"
 
+    this._model_transparency = 0.9;
+
     this._spots = null;
     this._mapping = null;
 
@@ -174,6 +176,18 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
 
         set: function(value) {
             this._model_export_name = value;
+        }
+    },
+
+    model_transparency: {
+        get: function() {
+            return this._model_transparency;
+        },
+
+        set: function(value) {
+            this._model_transparency = value;
+            this._mesh.material.opacity = value;
+            this._notify(Scene3D.Events.CHANGE);
         }
     },
 

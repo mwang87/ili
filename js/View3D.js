@@ -17,7 +17,7 @@ function View3D(group, div) {
     this._height = 0;
     this._autorotation = 0;
     this._autorotationStart = undefined;
-    this._camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
+    this._camera = new THREE.PerspectiveCamera(45, 1, 0.1, 10000);
     this._camera.position.x = -30;
     this._camera.position.y = 40;
     this._camera.position.z = 30;

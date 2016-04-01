@@ -101,6 +101,7 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
             result.geometry = geometry;
             result.spots = this.spots;
             result.mapping = this.mapping;
+            result.model_transparency = this.model_transparency
             return result;
         }
     },

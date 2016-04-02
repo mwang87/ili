@@ -64,6 +64,10 @@ ViewContainer.prototype = Object.create(null, {
             return new Promise(function(accept, reject) {
                 if (this._workspace.mode == Workspace.Mode.MODE_3D) {
                     var pixelRatio = window.devicePixelRatio * this._exportPixelRatio3d;
+
+                    //Hackjob to get users to enter the pixel ratio
+                    var pixelRatio = parseInt(prompt("Enter Pixel Ratio", "1"));
+
                     var width = this._div.clientWidth * pixelRatio;
                     var height = this._div.clientHeight * pixelRatio;
 

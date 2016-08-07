@@ -20,7 +20,7 @@ function Scene3D() {
     this._adjustment = {x: 0, y: 0, z: 0, alpha: 0, beta: 0, gamma: 0};
     this._model_slicing = {xmin: -100.0, xmax: 100.0, ymin: -100.0, ymax: 100.0, zmin: -100.0, zmax: 100.0};
     this._model_bounds = null
-    this._model_exploding = {do_explode: false, dimension: "x", num_partitions: 5, slice_separation: 0.3}
+    this._model_exploding = {do_explode: false, dimension: "x", num_partitions: 5, slice_separation: 0.3, slice_offset: 0.1, offset_dimension: 'y'}
     this._model_slicing_real_coordinates = {xmin: "-100.0", xmax: "100.0", ymin: "-100.0", ymax: "100.0", zmin: "-100.0", zmax: "100.0"};
     this._model_export = { download:
         function(parent_obj){
@@ -408,7 +408,7 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
         }
     }),
 
-    model_exploding: Scene3D._makeProxyProperty('_model_exploding', ['dimension', 'do_explode', 'num_partitions', 'slice_separation'],
+    model_exploding: Scene3D._makeProxyProperty('_model_exploding', ['dimension', 'do_explode', 'num_partitions', 'slice_separation', 'slice_offset', 'offset_dimension'],
             function() {
         if (this._mesh) {
             //Save out the model when appropriate
@@ -455,7 +455,7 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
             colors = this._old_geometry.getAttribute('color').array;
 
 
-
+            //Finding bounds of the model, so we can know how to chop it up
             if(this._model_bounds == null){
                 model_min_x = 1000000
                 model_max_x = -1000000
@@ -536,63 +536,99 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
                 }
                 //console.log(max_partition_number);
 
+                slice_offsets = this._model_exploding.slice_offset
+                offset_dimension = this._model_exploding.offset_dimension
+
                 for(j = 0; j < 3; j++){
                     x_idx = base + j * 3
                     y_idx = base + j * 3 + 1
                     z_idx = base + j * 3 + 2
 
-                    if(this._model_exploding.dimension == "x"){
-                        delta_x = model_max_x  - model_min_x;
+                    delta_x = model_max_x  - model_min_x;
+                    delta_y = model_max_y  - model_min_y;
+                    delta_z = model_max_z  - model_min_z;
 
+                    //Actually doing the update
+                    if(this._model_exploding.dimension == "x"){
                         new_positions[current_array_pointer] = positions[x_idx] + partition_separation_ratio*delta_x*max_partition_number
                         new_colors[current_array_pointer] = colors[x_idx]
                         new_normals[current_array_pointer] = normals[x_idx]
                         current_array_pointer++;
-                        new_positions[current_array_pointer] = positions[y_idx]
+
+                        if(offset_dimension == "y"){
+                            new_positions[current_array_pointer] = positions[y_idx] + slice_offsets*delta_y*max_partition_number
+                        }
+                        else{
+                            new_positions[current_array_pointer] = positions[y_idx]
+                        }
                         new_colors[current_array_pointer] = colors[y_idx]
                         new_normals[current_array_pointer] = normals[y_idx]
                         current_array_pointer++;
-                        new_positions[current_array_pointer] = positions[z_idx]
+
+                        if(offset_dimension == "z"){
+                            new_positions[current_array_pointer] = positions[z_idx] + slice_offsets*delta_z*max_partition_number
+                        }
+                        else{
+                            new_positions[current_array_pointer] = positions[z_idx]
+                        }
                         new_colors[current_array_pointer] = colors[z_idx]
                         new_normals[current_array_pointer] = normals[z_idx]
                         current_array_pointer++;
                     }
 
                     if(this._model_exploding.dimension == "y"){
-                        delta_y = model_max_y  - model_min_y;
-
-                        new_positions[current_array_pointer] = positions[x_idx]
+                        if(offset_dimension == "x"){
+                            new_positions[current_array_pointer] = positions[x_idx] + slice_offsets*delta_x*max_partition_number
+                        }
+                        else{
+                            new_positions[current_array_pointer] = positions[x_idx]
+                        }
                         new_colors[current_array_pointer] = colors[x_idx]
                         new_normals[current_array_pointer] = normals[x_idx]
                         current_array_pointer++;
+
                         new_positions[current_array_pointer] = positions[y_idx] + partition_separation_ratio*delta_y*max_partition_number
                         new_colors[current_array_pointer] = colors[y_idx]
                         new_normals[current_array_pointer] = normals[y_idx]
                         current_array_pointer++;
-                        new_positions[current_array_pointer] = positions[z_idx]
+
+                        if(offset_dimension == "z"){
+                            new_positions[current_array_pointer] = positions[z_idx] + slice_offsets*delta_z*max_partition_number
+                        }
+                        else{
+                            new_positions[current_array_pointer] = positions[z_idx]
+                        }
                         new_colors[current_array_pointer] = colors[z_idx]
                         new_normals[current_array_pointer] = normals[z_idx]
                         current_array_pointer++;
                     }
 
                     if(this._model_exploding.dimension == "z"){
-                        delta_z = model_max_z  - model_min_z;
-
-                        new_positions[current_array_pointer] = positions[x_idx]
+                        if(offset_dimension == "x"){
+                            new_positions[current_array_pointer] = positions[x_idx] + slice_offsets*delta_x*max_partition_number
+                        }
+                        else{
+                            new_positions[current_array_pointer] = positions[x_idx]
+                        }
                         new_colors[current_array_pointer] = colors[x_idx]
                         new_normals[current_array_pointer] = normals[x_idx]
                         current_array_pointer++;
-                        new_positions[current_array_pointer] = positions[y_idx]
+
+                        if(offset_dimension == "y"){
+                            new_positions[current_array_pointer] = positions[y_idx] + slice_offsets*delta_y*max_partition_number
+                        }
+                        else{
+                            new_positions[current_array_pointer] = positions[y_idx]
+                        }
                         new_colors[current_array_pointer] = colors[y_idx]
                         new_normals[current_array_pointer] = normals[y_idx]
                         current_array_pointer++;
+
                         new_positions[current_array_pointer] = positions[z_idx] + partition_separation_ratio*delta_z*max_partition_number
                         new_colors[current_array_pointer] = colors[z_idx]
                         new_normals[current_array_pointer] = normals[z_idx]
                         current_array_pointer++;
                     }
-
-
                 }
             }
 

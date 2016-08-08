@@ -36,6 +36,6 @@ g_workspace._scene3d._model_exploding.num_partitions = 9
 g_workspace._scene3d._model_exploding.dimension = 'z'
 
 //Doing the actual separations now
-recursive_set_separation("animation", 0, 0, 0.005, 0.15, 1000)()
+recursive_set_separation("animation", 0, 0, 0.002, 0.10, 1000)()
 
 

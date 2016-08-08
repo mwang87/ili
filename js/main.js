@@ -169,7 +169,6 @@ function initGUI() {
     model_exploding.add(g_workspace.scene3d.model_exploding, 'slice_separation', 0.00, 1.0).name('slice_separation').step(0.001);
     model_exploding.add(g_workspace.scene3d.model_exploding, 'offset_dimension', ["x", "y", "z"]).name('offset_dimension');
     model_exploding.add(g_workspace.scene3d.model_exploding, 'slice_offset', 0.00, 1.0).name('slice_offset').step(0.05);
-    //model_exports.add(g_workspace.scene3d.model_export,'animate').name("Animate Explosion");
 
 
     //Model Export Button

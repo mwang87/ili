@@ -408,7 +408,7 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
         }
     }),
 
-    model_exploding: Scene3D._makeProxyProperty('_model_exploding', ['dimension', 'do_explode', 'num_partitions', 'slice_separation', 'slice_offset', 'offset_dimension'],
+    model_exploding: Scene3D._makeProxyProperty('_model_exploding', ['dimension', 'do_explode', 'num_partitions', 'slice_separation', 'slice_offset', 'offset_dimension', 'animate'],
             function() {
         if (this._mesh) {
             //Save out the model when appropriate
@@ -498,6 +498,10 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
             new_colors = new Float32Array(positions.length)
             new_normals = new Float32Array(positions.length)
 
+            slice_offsets = this._model_exploding.slice_offset
+            offset_dimension = this._model_exploding.offset_dimension
+            exploding_dimension = this._model_exploding.dimension
+
             //Look over three vertices at a time, and then remove all 3 if any of the exceed a certain threshold
             current_array_pointer = 0
             for( i = 0; i < colors.length/9; i++){
@@ -510,7 +514,7 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
                     y_idx = base + j * 3 + 1
                     z_idx = base + j * 3 + 2
 
-                    if(this._model_exploding.dimension == "x"){
+                    if(exploding_dimension == "x"){
                         delta_x = model_max_x  - model_min_x;
                         transformed_x = positions[x_idx] - model_min_x;
                         normalized_x = transformed_x / delta_x;
@@ -518,7 +522,7 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
                         max_partition_number = Math.max(partition_number)
                     }
 
-                    if(this._model_exploding.dimension == "y"){
+                    if(exploding_dimension == "y"){
                         delta_dim = model_max_y  - model_min_y;
                         transformed_dim = positions[y_idx] - model_min_y;
                         normalized_dim = transformed_dim / delta_dim;
@@ -526,7 +530,7 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
                         max_partition_number = Math.max(partition_number)
                     }
 
-                    if(this._model_exploding.dimension == "z"){
+                    if(exploding_dimension == "z"){
                         delta_dim = model_max_z  - model_min_z;
                         transformed_dim = positions[z_idx] - model_min_z;
                         normalized_dim = transformed_dim / delta_dim;
@@ -536,8 +540,7 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
                 }
                 //console.log(max_partition_number);
 
-                slice_offsets = this._model_exploding.slice_offset
-                offset_dimension = this._model_exploding.offset_dimension
+
 
                 for(j = 0; j < 3; j++){
                     x_idx = base + j * 3
@@ -549,7 +552,7 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
                     delta_z = model_max_z  - model_min_z;
 
                     //Actually doing the update
-                    if(this._model_exploding.dimension == "x"){
+                    if(exploding_dimension == "x"){
                         new_positions[current_array_pointer] = positions[x_idx] + partition_separation_ratio*delta_x*max_partition_number
                         new_colors[current_array_pointer] = colors[x_idx]
                         new_normals[current_array_pointer] = normals[x_idx]
@@ -576,7 +579,7 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
                         current_array_pointer++;
                     }
 
-                    if(this._model_exploding.dimension == "y"){
+                    if(exploding_dimension == "y"){
                         if(offset_dimension == "x"){
                             new_positions[current_array_pointer] = positions[x_idx] + slice_offsets*delta_x*max_partition_number
                         }
@@ -603,7 +606,7 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
                         current_array_pointer++;
                     }
 
-                    if(this._model_exploding.dimension == "z"){
+                    if(exploding_dimension == "z"){
                         if(offset_dimension == "x"){
                             new_positions[current_array_pointer] = positions[x_idx] + slice_offsets*delta_x*max_partition_number
                         }

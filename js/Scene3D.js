@@ -37,7 +37,7 @@ function Scene3D() {
     this._spots = null;
     this._mapping = null;
 
-    this._scene.add(new THREE.AxisHelper(20));
+    //this._scene.add(new THREE.AxisHelper(20));
     this._scene.add(this._meshContainer);
     this._scene.add(this._frontLight);
 };

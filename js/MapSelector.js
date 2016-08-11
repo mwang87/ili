@@ -28,6 +28,9 @@ function MapSelector(workspace, div, mapName) {
             'mousedown', this._onItemMouseDown.bind(this), false);
     this._itemsContainer.addEventListener('click', this._onItemClick.bind(this), false);
     this._onWorkspaceIntencitiesChange();
+
+    //For programatic access
+    this._updateSelectedText = -1
 }
 
 MapSelector.prototype = Object.create(null, {
@@ -159,6 +162,21 @@ MapSelector.prototype = Object.create(null, {
                 value.setAttribute('selected', '');
                 value.scrollIntoViewIfNeeded();
                 this._selectIndex(Number(value.getAttribute('index')));
+            }
+        }
+    },
+
+    _updateSelectedText: {
+        get: function() {
+            return "BLARGH";
+        },
+
+        set: function(value) {
+            for(var i = 0; i < this._itemsContainer.children.length; i++){
+                if(value == this._itemsContainer.children[i].textContent){
+                    this.selectedItem = this._itemsContainer.children[i]
+                    break
+                }
             }
         }
     },

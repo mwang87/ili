@@ -39,6 +39,18 @@ set_mapping_feature = function(value){
 	g_mapSelector._updateSelectedText = value
 }
 
+get_set_mapping_and_capture_function = function(value, output_filename, follow_up_function){
+	return function(){
+		set_mapping_feature(value)
+		capture_screen(output_filename)
+		setTimeout(follow_up_function, 2000)
+	}
+}
+
+set_pixel_ratio = function(value){
+	g_views._exportPixelRatio3d = value
+}
+
 
 recursive_set_separation = function(base_filename, current_index, separation, increments, max_separation, waits){
 	return function(){
@@ -75,8 +87,9 @@ g_workspace._scene3d._model_exploding.num_partitions = 9
 g_workspace._scene3d._model_exploding.dimension = 'z'
 
 //Setup View of Model
-set_positioning_of_model(870, -1066, -881)
-set_rotation_of_model(-107, 10, -43)
+set_pixel_ratio(1)
+set_positioning_of_model(870, -1400, -881)
+set_rotation_of_model(--99, -6, -51)
 set_color_scaling("log")
 set_color_mapping("JET")
 set_mapping_feature("103.054 30 1")
@@ -84,7 +97,5 @@ set_mapping_feature("103.054 30 1")
 //Doing the actual separations now
 set_separation(0)
 set_slice_offset(0)
-recursive_set_separation("animation", 0, 0, 0.002, 0.10, 1000)()
-recursive_slice_offset("animation", 50, 0, 0.01, 0.3, 1000)()
-
-
+recursive_set_separation("animation", 0, 0, 0.002, 0.10, 2000)()
+recursive_slice_offset("animation", 50, 0, 0.01, 0.3, 2000)()

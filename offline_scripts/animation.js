@@ -89,7 +89,7 @@ g_workspace._scene3d._model_exploding.dimension = 'z'
 //Setup View of Model
 set_pixel_ratio(1)
 set_positioning_of_model(870, -1400, -881)
-set_rotation_of_model(--99, -6, -51)
+set_rotation_of_model(-99, -6, -51)
 set_color_scaling("log")
 set_color_mapping("JET")
 set_mapping_feature("103.054 30 1")

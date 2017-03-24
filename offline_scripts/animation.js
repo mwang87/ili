@@ -5,6 +5,7 @@ capture_screen = function(name){
 	});
 }
 
+
 set_positioning_of_model = function(x,y,z){
 	g_workspace._scene3d.adjustment.x = x
 	g_workspace._scene3d.adjustment.y = y
@@ -21,6 +22,11 @@ set_separation = function(value){
 	g_workspace._scene3d._model_exploding.slice_separation = value
 	g_workspace._scene3d.model_exploding.do_explode = true
 }
+
+set_opacity = function(value){
+	g_workspace._scene3d.model_transparency = value
+}
+
 
 set_slice_offset = function(value){
 	g_workspace._scene3d._model_exploding.slice_offset = value
@@ -51,6 +57,20 @@ set_pixel_ratio = function(value){
 	g_views._exportPixelRatio3d = value
 }
 
+recursive_set_opacity = function(base_filename, current_index, opacity, increments, min_opacity, waits){
+	return function(){
+		if(opacity < min_opacity){
+			return
+		}
+		else{
+			set_opacity(opacity)
+			number_string = "000000000" + current_index;
+			output_filename = base_filename + "_" + number_string.substr(number_string.length-3)
+			capture_screen(output_filename)
+			setTimeout(recursive_set_opacity(base_filename, current_index + 1, opacity - increments, increments, min_opacity, waits), waits);
+		}
+	}
+}
 
 recursive_set_separation = function(base_filename, current_index, separation, increments, max_separation, waits){
 	return function(){

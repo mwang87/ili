@@ -91,6 +91,7 @@ function init() {
 
         if("mapping_feature" in options){
             var mapping_feature = options["mapping_feature"]
+
             setTimeout(function() {
                 console.log(mapping_feature)
                 set_mapping_feature(mapping_feature)
@@ -100,6 +101,11 @@ function init() {
         if("explode_partitions" in options){
             var explode_partitions = options["explode_partitions"]
             var explode_dimension = options["explode_dimension"]
+
+            setTimeout(function() {
+                g_workspace._setStatus("Processing...")
+            }, 4000);
+
             setTimeout(function() {
                 console.log("Exploding")
                 g_workspace._scene3d._model_exploding.dimension = explode_dimension
@@ -110,6 +116,10 @@ function init() {
         if("slice_separation" in options){
             var slice_separation = options["slice_separation"]
             setTimeout(function() {
+                g_workspace._setStatus("Processing...")
+            }, 10001);
+
+            setTimeout(function() {
                 console.log("Separating")
                 set_separation(slice_separation)
             }, 12000);
@@ -118,8 +128,14 @@ function init() {
         if("slice_offset" in options){
             var slice_offset = options["slice_offset"]
             setTimeout(function() {
+                g_workspace._setStatus("Processing...")
+            }, 11000);
+
+
+            setTimeout(function() {
                 console.log("Offsetting")
                 set_slice_offset(slice_offset)
+                g_workspace._setStatus("")
             }, 14000);
         }
 

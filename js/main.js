@@ -41,8 +41,89 @@ function init() {
     }
 
     if (window.location.search) {
-        var fileNames = window.location.search.substr(1).split(';');
-        g_workspace.download(fileNames);
+        var options = window.location.search.slice(1)
+                      .split('&')
+                      .reduce(function _reduce (/*Object*/ a, /*String*/ b) {
+                        b = b.split('=');
+                        a[b[0]] = decodeURIComponent(b[1]);
+                        return a;
+                      }, {});
+        console.log(options)
+
+        var stl_filename = options["stl"]
+        var mapping_filename = options["mapping"]
+
+        //var fileNames = window.location.search.substr(1).split(';');
+        g_workspace.download([stl_filename, mapping_filename]);
+
+        if("position_x" in options){
+            var position_x = options["position_x"]
+            var position_y = options["position_y"]
+            var position_z = options["position_z"]
+
+            set_positioning_of_model(position_x, position_y, position_z)
+        }
+
+        if("rotation_x" in options){
+            var rotation_x = options["rotation_x"]
+            var rotation_y = options["rotation_y"]
+            var rotation_z = options["rotation_z"]
+
+            set_rotation_of_model(rotation_x, rotation_y, rotation_z)
+        }
+
+        if("mapping_value" in options){
+            var mapping_value = options["mapping_value"]
+            set_color_scaling("log")
+            set_color_mapping("JET")
+        }
+
+
+        if("mapping_scaling" in options){
+            var mapping_scaling = options["mapping_scaling"]
+            set_color_scaling(mapping_scaling)
+        }
+
+        if("mapping_color" in options){
+            var mapping_color = options["mapping_color"]
+            set_color_mapping(mapping_color)
+        }
+
+        if("mapping_feature" in options){
+            var mapping_feature = options["mapping_feature"]
+            setTimeout(function() {
+                console.log(mapping_feature)
+                set_mapping_feature(mapping_feature)
+            }, 8000);
+        }
+
+        if("explode_partitions" in options){
+            var explode_partitions = options["explode_partitions"]
+            var explode_dimension = options["explode_dimension"]
+            setTimeout(function() {
+                console.log("Exploding")
+                g_workspace._scene3d._model_exploding.dimension = explode_dimension
+                g_workspace._scene3d._model_exploding.num_partitions = explode_partitions
+            }, 10000);
+        }
+
+        if("slice_separation" in options){
+            var slice_separation = options["slice_separation"]
+            setTimeout(function() {
+                console.log("Separating")
+                set_separation(slice_separation)
+            }, 12000);
+        }
+
+        if("slice_offset" in options){
+            var slice_offset = options["slice_offset"]
+            setTimeout(function() {
+                console.log("Offsetting")
+                set_slice_offset(slice_offset)
+            }, 14000);
+        }
+
+
     }
 }
 

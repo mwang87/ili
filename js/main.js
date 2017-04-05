@@ -89,55 +89,93 @@ function init() {
             set_color_mapping(mapping_color)
         }
 
+        //List of functiosn to call
+        var functions_to_call = new Array();
+
+        var setting_processing = function(){
+            return function(){
+                g_workspace._setStatus("Processing...")
+            }
+        }()
+
+        functions_to_call.push(setting_processing)
+
         if("mapping_feature" in options){
             var mapping_feature = options["mapping_feature"]
 
-            setTimeout(function() {
-                console.log(mapping_feature)
-                set_mapping_feature(mapping_feature)
-            }, 20000);
+            var processing_function = function(mapping_feature){
+                return function(){
+                    set_mapping_feature(mapping_feature)
+                }
+            }(mapping_feature)
+            functions_to_call.push(processing_function)
         }
 
         if("explode_partitions" in options){
             var explode_partitions = options["explode_partitions"]
             var explode_dimension = options["explode_dimension"]
 
-            setTimeout(function() {
-                g_workspace._setStatus("Processing...")
-            }, 4000);
+            var processing_function = function(explode_partitions, explode_dimension){
+                return function(){
+                    g_workspace._scene3d._model_exploding.dimension = explode_dimension
+                    g_workspace._scene3d._model_exploding.num_partitions = explode_partitions
+                }
+            }(explode_partitions, explode_dimension)
 
-            setTimeout(function() {
-                console.log("Exploding")
-                g_workspace._scene3d._model_exploding.dimension = explode_dimension
-                g_workspace._scene3d._model_exploding.num_partitions = explode_partitions
-            }, 20000);
+            functions_to_call.push(processing_function)
         }
 
         if("slice_separation" in options){
             var slice_separation = options["slice_separation"]
-            setTimeout(function() {
-                g_workspace._setStatus("Processing...")
-            }, 20001);
 
-            setTimeout(function() {
-                console.log("Separating")
-                set_separation(slice_separation)
-            }, 22000);
+            var processing_function = function(slice_separation){
+                return function(){
+                    set_separation(slice_separation)
+                }
+            }(slice_separation)
+
+            functions_to_call.push(processing_function)
         }
 
         if("slice_offset" in options){
             var slice_offset = options["slice_offset"]
-            setTimeout(function() {
-                g_workspace._setStatus("Processing...")
-            }, 21000);
 
+            var processing_function = function(slice_offset){
+                return function(){
+                    set_slice_offset(slice_offset)
+                }
+            }(slice_offset)
 
-            setTimeout(function() {
-                console.log("Offsetting")
-                set_slice_offset(slice_offset)
-                g_workspace._setStatus("")
-            }, 24000);
+            functions_to_call.push(processing_function)
         }
+
+        var setting_processing_done = function(){
+            return function(){
+                g_workspace._setStatus("")
+            }
+        }()
+
+        //functions_to_call.push(setting_processing_done)
+
+        var process_functions = function(functions_list){
+            return function myself(){
+                if(g_workspace._scene3d.geometry == null || g_workspace._scene3d.mapping == null){
+                    console.log("NULL NOT LOADED")
+                    setTimeout(function() {
+                        myself();
+                    }, 50);
+                }
+                else{
+                    console.log("executing")
+                    for(var to_execute in functions_list){
+                        console.log(functions_list[to_execute])
+                        functions_list[to_execute]()
+                    }
+                }
+            }
+        }(functions_to_call)
+
+        process_functions()
 
 
     }

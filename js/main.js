@@ -98,7 +98,7 @@ function init() {
             }
         }()
 
-        functions_to_call.push(setting_processing)
+        //functions_to_call.push(setting_processing)
 
         if("mapping_feature" in options){
             var mapping_feature = options["mapping_feature"]
@@ -163,7 +163,7 @@ function init() {
                     console.log("NULL NOT LOADED")
                     setTimeout(function() {
                         myself();
-                    }, 50);
+                    }, 200);
                 }
                 else{
                     console.log("executing")

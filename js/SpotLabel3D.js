@@ -7,6 +7,7 @@ function SpotLabel3D(group, scene) {
     this._view = null;
     this._raycastPromise = null;
     this._div = null;
+    this._divs = [];
     this._changed = false;
 }
 
@@ -40,26 +41,30 @@ SpotLabel3D.prototype = Object.create(SpotLabelBase.prototype, asProps({
         this._group.requestAnimationFrame();
     },
 
-    update: function() {
+    update: function () {
         if (this._changed) {
-            if (this.div) {
-                this.removeDiv();
+            if (this._divs) {
+                this._divs.forEach(function(div) {
+                    div.parentNode.removeChild(div);
+                });
+                this._divs = [];
             }
             if (this._view && this._spot) {
-                this.createDiv('SpotLabel3D');
-                this.textContent = this._spot.name;
-                this._view.div.appendChild(this.div);
+                this._scene.spots.forEach(function (spot) {
+                    this.createDiv('SpotLabel3D');
+                    this._div.textContent = spot.name;
+                    this._view.div.appendChild(this.div);
+
+                    var position = this._scene.spotToWorld(spot);
+                    if (position) {
+                        var point2D = this._view.projectPosition(position);
+                        this._div.style.left = point2D.x + 'px'
+                        this._div.style.top = point2D.y + 'px'
+                    }
+                    this._divs.push(this.div);
+                }.bind(this));
             }
             this._changed = false;
-        }
-
-        if (this._view && this._spot && this._div) {
-            var position = this._scene.spotToWorld(this._spot);
-            if (position) {
-                var point2D = this._view.projectPosition(position);
-                this._div.style.left = point2D.x + 'px'
-                this._div.style.top = point2D.y + 'px'
-            }
         }
     },
 }));

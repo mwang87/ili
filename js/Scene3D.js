@@ -502,6 +502,22 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
             offset_dimension = this._model_exploding.offset_dimension
             exploding_dimension = this._model_exploding.dimension
 
+            delta_x = model_max_x  - model_min_x;
+            delta_y = model_max_y  - model_min_y;
+            delta_z = model_max_z  - model_min_z;
+
+            var zPartitionSize = delta_z / number_of_partitions;
+            var zPartitionGap = delta_z * partition_separation_ratio / 2;
+            var yPartitionOffset = delta_y * slice_offsets / 2;
+
+            this.spots.forEach(function (spot) {
+                if (exploding_dimension == "z" && offset_dimension == "y") {
+                    var lowerPartitionCount = Math.floor((spot.z - model_min_z) / zPartitionSize);
+                    spot.z += lowerPartitionCount * zPartitionGap;
+                    spot.y += lowerPartitionCount * yPartitionOffset;
+                }
+            });
+
             //Look over three vertices at a time, and then remove all 3 if any of the exceed a certain threshold
             current_array_pointer = 0
             for( i = 0; i < colors.length/9; i++){
@@ -546,10 +562,6 @@ Scene3D.prototype = Object.create(EventSource.prototype, {
                     x_idx = base + j * 3
                     y_idx = base + j * 3 + 1
                     z_idx = base + j * 3 + 2
-
-                    delta_x = model_max_x  - model_min_x;
-                    delta_y = model_max_y  - model_min_y;
-                    delta_z = model_max_z  - model_min_z;
 
                     //Actually doing the update
                     if(exploding_dimension == "x"){

@@ -182,21 +182,21 @@ function init() {
 }
 
 var KEYBOARD_SHORTCUTS = {
-    'U+004F': chooseFilesToOpen, // Ctrl + O
-    'U+0046': function() { // Ctrl + F
+    '79': chooseFilesToOpen, // Ctrl + O
+    '70': function() { // Ctrl + F
         g_mapSelector.activate();
     },
-    'U+0053': function() { // Ctrl + S
+    '83': function() { // Ctrl + S
         var name = g_workspace.mapName || 'image';
         g_views.export().then(function(blob) {
             saveAs(blob, name + '.png');
         });
     },
-    'Up': function() {
+    '38': function() {
         g_mapSelector.blink();
         g_mapSelector.navigate(MapSelector.Direction.UP);
     },
-    'Down': function() {
+    '40': function() {
         g_mapSelector.blink();
         g_mapSelector.navigate(MapSelector.Direction.DOWN);
     },
@@ -209,8 +209,9 @@ function onKeyDown(event) {
         if (!event.ctrlKey || event.altKey || event.metaKey) return;
     }
 
-    if (event.keyIdentifier in KEYBOARD_SHORTCUTS) {
-        var handler = KEYBOARD_SHORTCUTS[event.keyIdentifier];
+    var key = (event.which ? event.which : event.keyCode).toString();
+    if (key in KEYBOARD_SHORTCUTS) {
+        var handler = KEYBOARD_SHORTCUTS[key];
         handler();
         event.stopPropagation();
         event.preventDefault();
